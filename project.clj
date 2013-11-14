@@ -1,8 +1,9 @@
 (defproject org-html-slides "0.0.1-SNAPSHOT"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-1896"]]
-  :plugins [[lein-cljsbuild "0.3.3"]]
+                 [org.clojure/clojurescript "0.0-2030"]]
+  :plugins [[lein-cljsbuild "0.3.3"]
+            [lein-ancient "0.5.3"]]
   :library-path "lib/jars"
   :source-paths ["lib/domina/src/cljs" "lib/one/src/lib/cljs"]
   :cljsbuild {:builds
