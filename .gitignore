@@ -3,4 +3,7 @@
 /out/development
 *~
 #*
-/.lein*
+/.lein*production/
+target/
+production
+.lein-failures

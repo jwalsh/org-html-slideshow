@@ -82,6 +82,11 @@
      (. goog-event (stopPropagation)))
     (dispatch/fire event-id goog-event)))
 
+(defn nearest-containing-div [elem]
+  (if (= "DIV" (. elem -nodeName))
+    elem
+    (recur (. elem -parentNode))))
+
 (defn show! [content]
   (when content (style/showElement (d/single-node content) true)))
 
@@ -221,11 +226,6 @@
 (def current-slide-div-html
   "<div id=\"current-slide\"></div>")
 
-(defn nearest-containing-div [elem]
-  (if (= "DIV" (. elem -nodeName))
-    elem
-    (recur (. elem -parentNode))))
-
 (def heading-tag-names (set (map #(str "H" %) (range 1 9))))
 
 (defn copy-heading-tags-to-div-classes []
@@ -238,7 +238,7 @@
 (defn remove-nested-sections [slide-div-elem]
   (let [div (. slide-div-elem (cloneNode true))]
     (doseq [elem (dom-tags "div" nil div)]
-      (when (and (not )
+      (when (and (not elem)
                  (some #(classes/has elem (str "outline-" %)) (range 1 9)))
         (remove-elem elem)))
     div))
@@ -281,6 +281,7 @@
   (set-location-fragment id)
   (set! (. (dom/getElement "current-slide") -innerHTML) html)
   (show-presenter-slides))
+
 
 
 ;;; GUI EVENTS
@@ -340,7 +341,7 @@
 
 (defn go-to-top []
   (set-location-fragment "top")
-  (. window (scrollTo 0 0)))
+  (. js/window (scrollTo 0 0)))
 
 
 ;;; KEYBOARD
@@ -389,6 +390,7 @@
   "
 <html>
   <head>
+    <title></title>
   </head>
   <body class=\"presenter-display\">
     <div id=\"presenter-slide-preview\">
@@ -466,19 +468,6 @@
   (when-let [win (get-presenter-window)]
     (update-presenter-elapsed-time win)))
 
-(defn show-presenter-slides []
-  (when-let [win (get-presenter-window)]
-    (let [{:keys [html notes-html]} (current-slide)]
-      (let [div (.. win -document
-                    (getElementById "presenter-current-slide"))]
-        (set! (. div -innerHTML) html))
-      (let [div (.. win -document
-                    (getElementById "presenter-notes-container"))]
-        (set! (. div -innerHTML) notes-html)))
-    (let [div (.. win -document
-                  (getElementById "presenter-next-slide"))]
-      (set! (. div -innerHTML) (:html (next-slide))))))
-
 (defn show-presenter-window []
   (if-let [win (get-presenter-window)]
     (. win (focus))
@@ -500,6 +489,20 @@
                          (fire-handler :reset-elapsed-time)))
         (show-presenter-slides)
         (update-presenter-clock))))
+
+
+(defn show-presenter-slides []
+  (when-let [win (get-presenter-window)]
+    (let [{:keys [html notes-html]} (current-slide)]
+      (let [div (.. win -document
+                    (getElementById "presenter-current-slide"))]
+        (set! (. div -innerHTML) html))
+      (let [div (.. win -document
+                    (getElementById "presenter-notes-container"))]
+        (set! (. div -innerHTML) notes-html)))
+    (let [div (.. win -document
+                  (getElementById "presenter-next-slide"))]
+      (set! (. div -innerHTML) (:html (next-slide))))))
 
 
 ;;; EVENTS
